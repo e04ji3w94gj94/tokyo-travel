@@ -181,6 +181,11 @@
       display: flex;
       gap: 8px;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      scroll-snap-type: x proximity;
+      touch-action: pan-x;
+      cursor: grab;
       padding: 4px 2px 16px;
       margin: 0 -2px 18px;
       position: sticky;
@@ -188,6 +193,12 @@
       background: transparent;
       z-index: 5;
       scrollbar-width: none;
+      user-select: none;
+    }
+
+    nav.days.dragging {
+      cursor: grabbing;
+      scroll-snap-type: none;
     }
 
     nav.days::-webkit-scrollbar {
@@ -195,6 +206,7 @@
     }
 
     nav.days button {
+      scroll-snap-align: start;
       flex-shrink: 0;
       font-family: "Zen Kaku Gothic New", sans-serif;
       font-size: 13px;
@@ -435,13 +447,14 @@
       {
         date: "10/07", weekday: "三", theme: "富士山",
         items: [
-          { time: "07:00", title: "富士急高速巴士　橫濱 → 河口湖", desc: "橫濱站西口 22 號乘車處，建議提前線上預約座位，車程約 1.5–2 小時", cat: "move", tag: "2,300 日圓" },
+          { time: "07:30–09:54", title: "橫浜駅西口～富士急ハイランド・河口湖駅線", desc: "橫濱站西口 22號乘車處，$2300 円", cat: "move" },
           { time: "", title: "河口湖周遊券（紅線／綠線／藍線）", desc: "河口湖・西湖周遊巴士全線通行券 1 日券", cat: "move" },
           { time: "", title: "早餐", desc: "", cat: "food" },
-          { time: "10:45–13:00", title: "大石公園、河口湖自然生活館", desc: "搭乘紅線周遊巴士至終點站「大石公園」；園區商店 09:00–17:15", cat: "sight" },
-          { time: "12:00–14:00", title: "河口湖音樂盒之森美術館（含午餐）", desc: "搭乘紅線周遊巴士至「音樂盒之森美術館」站；10:00–17:00，最後入場 16:30", cat: "sight" },
-          { time: "14:30–17:00", title: "河口湖富士山纜車、天上山公園", desc: "搭乘紅線周遊巴士至「遊覽船・山纜車入口」站；08:30–17:00，下行末班車 17:20", cat: "sight" },
-          { time: "", title: "晚餐", desc: "", cat: "food" },
+          { time: "10:45", title: "午餐　紅梅や", desc: "", cat: "food" },
+          { time: "12:00–13:30", title: "大石公園、河口湖自然生活館", desc: "搭乘紅線周遊巴士至終點站「大石公園」；園區商店 09:00–17:15", cat: "sight" },
+          { time: "14:00–15:00", title: "河口湖音樂盒之森美術館", desc: "搭乘紅線周遊巴士至「音樂盒之森美術館」站；10:00–17:00，最後入場 16:30", cat: "sight" },
+          { time: "15:30–17:00", title: "河口湖富士山纜車、天上山公園", desc: "搭乘紅線周遊巴士至「遊覽船・山纜車入口」站；08:30–17:00，下行末班車 17:20", cat: "sight" },
+          { time: "", title: "晚餐　甲州ほうとう小作 河口湖店", desc: "", cat: "food" },
           { time: "住宿", title: "MYSTAYS 富士山展望温泉酒店", desc: "2654 Arakura, Fujiyoshida, Yamanashi 403-0011", cat: "stay" },
         ]
       },
@@ -449,9 +462,9 @@
         date: "10/08", weekday: "四", theme: "富士山 → 東京",
         items: [
           { time: "09:00–10:40", title: "新倉山淺間公園（忠靈塔）", desc: "河口湖站搭乘富士急行線電車約 15 分至下吉田，步行約 10 分至神社入口", cat: "sight" },
-          { time: "10:50–12:00", title: "下吉田本町通（日川時計店）＋ 金鳥居（含午餐）", desc: "", cat: "sight" },
-          { time: "13:40–15:15", title: "河口湖大橋 ＆ 產屋崎", desc: "河口湖站搭乘紅線周遊巴士約 10 分至「產屋崎」或「河口湖大橋」站", cat: "sight" },
-          { time: "16:30–18:30", title: "富士急／京王高速巴士　河口湖 → 東京市區", desc: "直達新宿／東京站，車程約 1.5–2 小時", cat: "move", tag: "2,200–2,300 日圓" },
+          { time: "10:50–13:30", title: "下吉田本町通（日川時計店）＋ 金鳥居（含午餐）", desc: "", cat: "sight" },
+          { time: "14:30–16:00", title: "河口湖大橋 ＆ 產屋崎", desc: "河口湖站搭乘紅線周遊巴士約 10 分至「產屋崎」或「河口湖大橋」站", cat: "sight" },
+          { time: "18:23–20:30", title: "秋葉原駅～富士急ハイランド・河口湖駅線", desc: "富士急樂園，$2200 円", cat: "move" },
           { time: "", title: "晚餐", desc: "", cat: "food" },
           { time: "住宿", title: "Anshin Oyado Akihabara Electric Town Branch", desc: "安心お宿　秋葉原電気街店・東京都千代田區外神田 1-2-12", cat: "stay" },
         ]
@@ -577,6 +590,27 @@
       panel.appendChild(stream);
       panels.appendChild(panel);
     });
+
+    // 讓日期選單可以用滑鼠拖曳（桌機／觸控板），觸控裝置原生支援滑動
+    (function enableDragScroll(el) {
+      let isDown = false, startX = 0, startScroll = 0, moved = false;
+      el.addEventListener("mousedown", (e) => {
+        isDown = true; moved = false;
+        el.classList.add("dragging");
+        startX = e.pageX;
+        startScroll = el.scrollLeft;
+      });
+      window.addEventListener("mouseup", () => { isDown = false; el.classList.remove("dragging"); });
+      window.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const dx = e.pageX - startX;
+        if (Math.abs(dx) > 4) moved = true;
+        el.scrollLeft = startScroll - dx;
+      });
+      // 拖曳後避免誤觸點擊切換日期
+      el.addEventListener("click", (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); } }, true);
+    })(nav);
 
     function selectDay(i) {
       document.querySelectorAll("nav.days button").forEach((b, bi) => b.classList.toggle("active", bi === i));
